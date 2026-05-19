@@ -4,15 +4,22 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("Configuracion de Movimiento")]
-    [SerializeField] private float speed = 7f;
-    [SerializeField] private float gravity = -20f;
-    [SerializeField] private float jumpForce = 8f;
+    [Header("Configuración de Movimiento")]
+    [SerializeField] private float speed = 9f; // Aumenté un poco para más fluidez
+    [SerializeField] private float acceleration = 50f; // Para que no sea instantáneo
+    [SerializeField] private float gravity = -25f;
+    [SerializeField] private float jumpForce = 10f;
     
-    [Header("Estado Actual")]
+    [Header("Mejoras de Sensación (Game Feel)")]
+    [SerializeField] private float coyoteTime = 0.15f; // Tiempo de gracia al caer
+    [SerializeField] private float jumpBufferTime = 0.2f; // Tiempo para "pre-presionar" el salto
+
+    private float coyoteTimeCounter;
+    private float jumpBufferCounter;
+    private float currentHorizontalSpeed;
+
     private Vector2 moveInput;
     private Vector3 verticalVelocity;
-
     private CharacterController controller;
 
     private void Awake()
@@ -22,11 +29,31 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        HandleTimers();
         HandleHorizontalMovement();
         ApplyGravity();
+        CheckJump();
     }
 
-    // --- Inputs ---
+    private void HandleTimers()
+    {
+        // Lógica de Coyote Time
+        if (controller.isGrounded)
+        {
+            coyoteTimeCounter = coyoteTime; // Resetear contador mientras tocamos suelo
+        }
+        else
+        {
+            coyoteTimeCounter -= Time.deltaTime; // Empezar a descontar al aire
+        }
+
+        // Lógica de Jump Buffer
+        if (jumpBufferCounter > 0)
+        {
+            jumpBufferCounter -= Time.deltaTime;
+        }
+    }
+
     public void OnMove(InputValue value)
     {
         moveInput = value.Get<Vector2>();
@@ -34,17 +61,36 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump(InputValue value)
     {
-        if (controller.isGrounded)
+        if (value.isPressed)
         {
-            verticalVelocity.y = jumpForce; 
+            jumpBufferCounter = jumpBufferTime; // Registramos la intención de saltar
         }
     }
 
-    // --- Logica ---
     private void HandleHorizontalMovement()
     {
-        Vector3 moveDirection = new Vector3(moveInput.x, 0, 0); 
-        controller.Move(moveDirection * speed * Time.deltaTime);
+        float targetDirection = 0;
+        if (moveInput.x > 0.1f) targetDirection = 1f;
+        else if (moveInput.x < -0.1f) targetDirection = -1f;
+
+        float targetSpeed = targetDirection * speed;
+        
+        // MoveTowards nos da una aceleración fluida en lugar de un cambio seco
+        currentHorizontalSpeed = Mathf.MoveTowards(currentHorizontalSpeed, targetSpeed, acceleration * Time.deltaTime);
+
+        Vector3 moveDirection = new Vector3(currentHorizontalSpeed, 0, 0); 
+        controller.Move(moveDirection * Time.deltaTime);
+    }
+
+    private void CheckJump()
+    {
+        // Si hay un salto en el buffer Y estamos en el tiempo de gracia (Coyote Time)
+        if (jumpBufferCounter > 0 && coyoteTimeCounter > 0)
+        {
+            verticalVelocity.y = jumpForce;
+            jumpBufferCounter = 0; // Limpiamos el buffer para no saltar doble
+            coyoteTimeCounter = 0; // Limpiamos el coyote para no saltar en el aire dos veces
+        }
     }
 
     private void ApplyGravity()
