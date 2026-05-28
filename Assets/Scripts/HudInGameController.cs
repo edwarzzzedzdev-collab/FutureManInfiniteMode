@@ -106,4 +106,16 @@ public class HudInGameController : MonoBehaviour
         pauseCanvasGroup.alpha = targetAlpha;
         onComplete?.Invoke(); // Ejecuta acciones secundarias (como desactivar el GameObject)
     }
+
+    public void OpenConfig()
+    {
+        if (ConfigController.Instance != null)
+        {
+            ConfigController.Instance.ActiveConfigPanel();
+        }
+        else
+        {
+            Debug.LogError("No se encontró el ConfigController en la escena.");
+        }
+    }
 }

@@ -41,11 +41,20 @@ public class FadeManager : MonoBehaviour
     }
 
     // Se ejecuta AUTOMÁTICAMENTE cada vez que entras a una nueva escena
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+   private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+{
+    StartCoroutine(Fade(0f));
+
+    // Control automático de música ambiental
+    if (scene.name == "StartScene")
     {
-        // Al entrar a una escena, hacemos un Fade In (de Negro a Transparente)
-        StartCoroutine(Fade(0f));
+        AudioManager.Instance.PlayMenuMusic();
     }
+    else if (scene.name == "Game") // Nombre de tu escena procedimental
+    {
+        AudioManager.Instance.StartGamePlaylist();
+    }
+}
 
     // Método PÚBLICO que llamarás desde tus botones (ej: desde el HudController)
     public void ChangeSceneWithFade(string sceneName)

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
@@ -33,6 +34,13 @@ public class PlayerController : MonoBehaviour
         HandleHorizontalMovement();
         ApplyGravity();
         CheckJump();
+
+
+
+        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            ShootTest();
+        }
     }
 
     private void HandleTimers()
@@ -102,5 +110,26 @@ public class PlayerController : MonoBehaviour
 
         verticalVelocity.y += gravity * Time.deltaTime;
         controller.Move(verticalVelocity * Time.deltaTime);
+    }
+// Requerido para capturar el teclado/ratón nuevo
+
+
+    [Header("Prueba de Audio")]
+    [SerializeField] private AudioClip shootSound; // Aquí arrastrarás el sonido del disparo (.wav/.mp3)
+
+   
+
+    void ShootTest()
+    {
+        // REGLA DE ORO: Validamos que el AudioManager exista antes de llamarlo
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX(shootSound);
+            Debug.Log("<color=green>Player:</color> ¡Piu! Sonido enviado al AudioManager.");
+        }
+        else
+        {
+            Debug.LogWarning("Player: No se encontró el AudioManager en la escena.");
+        }
     }
 }
