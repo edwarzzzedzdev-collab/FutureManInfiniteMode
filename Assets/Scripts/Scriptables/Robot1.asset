@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a3c9c6d63738e74e9dc96f2601eb3dc, type: 3}
+  m_Name: Robot1
+  m_EditorClassIdentifier: Assembly-CSharp::Enemy1Data
+  maxHealth: 3
+  flashMaterial: {fileID: 2100000, guid: 65903108071624748ac839f610e6043e, type: 2}
+  flashDuration: 0.1
+  stunDuration: 0.5
+  explosionPrefab: {fileID: 0}
+  speed: 5
+  turboSpeed: 1.5
+  environmentLayer:
+    serializedVersion: 2
+    m_Bits: 768
+  checkOffset: {x: 0.2, y: 0.2, z: 0}
+  detectorRadius: 0.8
+  castDistance: 1
+  playerDetectionRange: 6
+  visionThickness: 0.5
+  movEye: 0.004
+  bobFrequency: 5
+  bobAmplitude: 0.03
+  chaseColor: {r: 1, g: 0, b: 0, a: 1}
+  resetTireScale: 0
