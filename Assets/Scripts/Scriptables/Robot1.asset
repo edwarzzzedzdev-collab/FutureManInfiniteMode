@@ -18,15 +18,15 @@ MonoBehaviour:
   stunDuration: 0.5
   explosionPrefab: {fileID: 0}
   speed: 5
-  turboSpeed: 1.5
+  turboSpeed: 3.07
   environmentLayer:
     serializedVersion: 2
     m_Bits: 768
   checkOffset: {x: 0.2, y: 0.2, z: 0}
   detectorRadius: 0.8
   castDistance: 1
-  playerDetectionRange: 6
-  visionThickness: 0.5
+  playerDetectionRange: 6.25
+  visionThickness: 1.31
   movEye: 0.004
   bobFrequency: 5
   bobAmplitude: 0.03
