@@ -22,17 +22,51 @@ public class PlayerController : MonoBehaviour
     private Vector3 verticalVelocity;
     private CharacterController controller;
 
+    // Variables para el control del retroceso
+    private float knockbackTimer = 0f;
+    private Vector3 knockbackDirection;
+    private float knockbackForce;
+
+    // FIX 2.5D: Variable para congelar el carril
+    private float lockedZPosition;
+
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
+        
+        // Guardamos la posición Z inicial del jugador al arrancar el nivel
+        lockedZPosition = transform.position.z;
     }
 
     private void Update()
     {
         HandleTimers();
-        HandleHorizontalMovement();
+
+        if (knockbackTimer > 0)
+        {
+            knockbackTimer -= Time.deltaTime;
+            ExecuteKnockbackMovement();
+        }
+        else
+        {
+            HandleHorizontalMovement();
+            CheckJump();
+        }
+
         ApplyGravity();
-        CheckJump();
+    }
+
+    // --- EL FIX SÚPER IMPORTANTE ---
+    private void LateUpdate()
+    {
+        // Si por culpa de un enemigo o un choque el jugador se movió en Z...
+        if (transform.position.z != lockedZPosition)
+        {
+            // Lo regresamos a la fuerza a su carril correcto
+            Vector3 correctedPosition = transform.position;
+            correctedPosition.z = lockedZPosition;
+            transform.position = correctedPosition;
+        }
     }
 
     private void HandleTimers()
@@ -59,6 +93,8 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump(InputValue value)
     {
+        if (knockbackTimer > 0) return;
+
         if (value.isPressed)
         {
             jumpBufferCounter = jumpBufferTime; 
@@ -76,6 +112,24 @@ public class PlayerController : MonoBehaviour
 
         Vector3 moveDirection = new Vector3(currentHorizontalSpeed, 0, 0); 
         controller.Move(moveDirection * Time.deltaTime);
+    }
+
+   // Reemplaza este método en tu PlayerController.cs
+    public void ApplyKnockback(Vector3 direction, float force, float upwardForce, float duration)
+    {
+        knockbackTimer = duration;
+        
+        knockbackDirection = new Vector3(direction.x, 0f, 0f).normalized;
+        knockbackForce = force;
+        currentHorizontalSpeed = 0f; // Cortamos en seco su velocidad horizontal
+
+        verticalVelocity.y = upwardForce; 
+    }
+
+    private void ExecuteKnockbackMovement()
+    {
+        Vector3 knockbackMove = knockbackDirection * knockbackForce;
+        controller.Move(knockbackMove * Time.deltaTime);
     }
 
     private void CheckJump()

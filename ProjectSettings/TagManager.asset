@@ -7,6 +7,8 @@ TagManager:
   - OpenConfig
   - Attack
   - Damage
+  - Live
+  - RealTimeCoinText
   layers:
   - Default
   - TransparentFX

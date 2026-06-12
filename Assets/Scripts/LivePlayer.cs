@@ -14,7 +14,8 @@ public class LivePlayer : MonoBehaviour
     private bool isInvincible = false;
 
     [Header("Configuración de Retroceso (Knockback)")]
-    [SerializeField] private float knockbackForce = 8f;
+    [SerializeField] private float knockbackForce = 12f;
+    [SerializeField] private float knockbackUpwardForce = 6f; // <-- NUEVA: Fuerza del pequeño salto vertical
     [Tooltip("Tiempo que el jugador perderá el control para ser empujado")]
     [SerializeField] private float knockbackDuration = 0.15f;
 
@@ -23,9 +24,8 @@ public class LivePlayer : MonoBehaviour
     public GameObject diePrefab;
 
     private Vector3 initialBarScale;
-    private Rigidbody rb;
+    private PlayerController playerController;
 
-    // Estructura para almacenar los materiales de cada pieza del traje/cuerpo del Player
     private struct RendererData
     {
         public Renderer renderer;
@@ -35,7 +35,6 @@ public class LivePlayer : MonoBehaviour
 
     void Awake()
     {
-        // 1. Guardamos de forma automática todos los materiales originales del Player
         Renderer[] renderers = GetComponentsInChildren<Renderer>();
         cachedRenderers = new RendererData[renderers.Length];
 
@@ -49,7 +48,7 @@ public class LivePlayer : MonoBehaviour
     void Start()
     {
         currentHealth = maxHealth;
-        rb = GetComponent<Rigidbody>();
+        playerController = GetComponent<PlayerController>();
 
         if (liveBar != null)
         {
@@ -57,7 +56,6 @@ public class LivePlayer : MonoBehaviour
         }
     }
 
-    // Ahora este método exige saber la POSICIÓN del daño para calcular el retroceso
     public void TakeDamage(int damageAmount, Vector3 damageSourcePosition)
     {
         if (isDead || isInvincible) return;
@@ -73,7 +71,6 @@ public class LivePlayer : MonoBehaviour
         }
         else
         {
-            // Iniciamos la rutina que controla el combo de efectos post-daño
             StartCoroutine(DamageEffectsRoutine(damageSourcePosition));
         }
     }
@@ -82,30 +79,23 @@ public class LivePlayer : MonoBehaviour
     {
         isInvincible = true;
 
-        // --- EFECTO 1: RETROCESO (KNOCKBACK) ---
-        if (rb != null)
+        // --- RETROCESO MEJORADO CON IMPULSO VERTICAL ---
+        if (playerController != null)
         {
-            // Calculamos la dirección opuesta al origen del daño
             Vector3 knockbackDir = (transform.position - damageSourcePosition);
-            knockbackDir.y = 0; // Evitamos que el jugador salga volando hacia arriba
+            knockbackDir.y = 0; 
             knockbackDir.Normalize();
 
-            // Reseteamos la velocidad previa para que el impacto sea seco y predecible
-            rb.velocity = Vector3.zero; 
-            
-            // Aplicamos un impulso físico inmediato
-            rb.AddForce(knockbackDir * knockbackForce, ForceMode.Impulse);
+            // Enviamos tanto la fuerza horizontal como la nueva fuerza vertical hacia arriba
+            playerController.ApplyKnockback(knockbackDir, knockbackForce, knockbackUpwardForce, knockbackDuration);
         }
 
-        // --- EFECTO 2: DESTELLO VISUAL ---
+        // --- EFECTO VISUAL ---
         ToggleFlashEffect(true);
-        
-        // El flash visual suele durar menos que toda la invencibilidad para no cansar la vista
         yield return new WaitForSeconds(0.15f); 
         ToggleFlashEffect(false);
 
-        // --- EFECTO 3: ESPERA DE INVULNERABILIDAD ---
-        // Restamos el tiempo que ya gastamos en el flash visual
+        // --- ESPERA DE INVULNERABILIDAD ---
         float remainingInvincibility = invincibilityDuration - 0.15f;
         if (remainingInvincibility > 0)
         {
@@ -164,23 +154,21 @@ public class LivePlayer : MonoBehaviour
     {
         isDead = true;
 
-        if (diePrefab != null)
+        if (GameOverController.Instance != null)
         {
-            Instantiate(diePrefab, transform.position, transform.rotation);
+            GameOverController.Instance.TriggerGameOver();
         }
 
-        Debug.Log("<color=red><b>[Player]</b></color> El jugador ha muerto.");
+        if (diePrefab != null) Instantiate(diePrefab, transform.position, transform.rotation);
         Destroy(gameObject);
     }
 
     private void OnTriggerEnter(Collider other) 
     {
-        // Si el jugador ya está en su tiempo de invulnerabilidad, el trigger ignora los ataques por completo
         if (isDead || isInvincible) return;
 
         if (other.CompareTag("Damage"))
         {
-            // Pasamos la posición del objeto dañino para saber de dónde viene el golpe
             TakeDamage(1, other.transform.position);
         }
         else if (other.CompareTag("Damage2"))
