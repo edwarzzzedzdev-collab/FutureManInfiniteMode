@@ -128,13 +128,15 @@ public class GameOverController : MonoBehaviour
         Debug.Log("<color=green><b>[GameOverController]</b></color> ¡El jugador se ha movido! Cronómetro iniciado.");
     }
 
-    public void AddCoinFromRun()
-    {
-        if (isPlayerDead) return;
-        coinsByRun++;
-
-        viewCoins();
-    }
+    // Reemplaza este método en tu GameOverController
+public void AddCoinFromRun(int value)
+{
+    if (isPlayerDead) return;
+    
+    coinsByRun += value; 
+    
+    viewCoins(); 
+}
 
     public void viewCoins()
 {
