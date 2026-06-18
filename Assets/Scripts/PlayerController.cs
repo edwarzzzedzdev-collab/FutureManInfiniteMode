@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [Header("Mejoras de Sensación (Game Feel)")]
     [SerializeField] private float coyoteTime = 0.15f; 
     [SerializeField] private float jumpBufferTime = 0.2f; 
+    private Vector3 externalVelocity;
 
     private float coyoteTimeCounter;
     private float jumpBufferCounter;
@@ -38,9 +39,16 @@ public class PlayerController : MonoBehaviour
         lockedZPosition = transform.position.z;
     }
 
+    // ... dentro de PlayerController.cs
+
+    private Vector3 moveDirection; // 1. Declarar esta variable aquí arriba, fuera de los métodos
+
     private void Update()
     {
         HandleTimers();
+
+        // 2. Definir movimiento base
+        moveDirection = new Vector3(currentHorizontalSpeed, 0, 0);
 
         if (knockbackTimer > 0)
         {
@@ -54,7 +62,40 @@ public class PlayerController : MonoBehaviour
         }
 
         ApplyGravity();
+
+        // 3. Aplicar el impulso del muelle (externalVelocity)
+        if (!controller.isGrounded)
+        {
+            externalVelocity.y += Physics.gravity.y * Time.deltaTime;
+        }
+        else
+        {
+            externalVelocity.y = -0.5f; 
+        }
+
+        // 4. Moverse usando la suma de todo
+        Vector3 finalMovement = moveDirection + new Vector3(0, verticalVelocity.y, 0) + externalVelocity;
+        controller.Move(finalMovement * Time.deltaTime);
     }
+
+public void ApplySpringJump(float force)
+{
+    // 1. SIMULAMOS EL SALTO (Lo que hace OnJump internamente)
+    // Forzamos a que el buffer se active como si hubiera presionado el botón en este instante
+    jumpBufferCounter = jumpBufferTime; 
+    
+    // Forzamos también el Coyote Time para asegurarnos de que el método CheckJump() 
+    // valide el salto aunque el personaje esté flotando en el aire.
+    coyoteTimeCounter = coyoteTime; 
+
+    // 2. EJECUTAMOS EL SALTO DE INMEDIATO
+    // Llamamos a tu método para que aplique la 'jumpForce' base
+    CheckJump();
+
+    // 3. LE SUMAMOS LA FUERZA DEL MUELLE
+    // Ahora que verticalVelocity.y ya tiene la fuerza del salto normal, le acumulamos el impulso extra
+    verticalVelocity.y += force;
+}
 
     // --- EL FIX SÚPER IMPORTANTE ---
     private void LateUpdate()
@@ -132,24 +173,35 @@ public class PlayerController : MonoBehaviour
         controller.Move(knockbackMove * Time.deltaTime);
     }
 
-    private void CheckJump()
+   private void CheckJump()
+{
+    if (jumpBufferCounter > 0 && coyoteTimeCounter > 0)
     {
-        if (jumpBufferCounter > 0 && coyoteTimeCounter > 0)
-        {
-            verticalVelocity.y = jumpForce;
-            jumpBufferCounter = 0; 
-            coyoteTimeCounter = 0; 
-        }
+        verticalVelocity.y = jumpForce;
+
+        jumpBufferCounter = 0f; 
+        coyoteTimeCounter = 0f; 
+        
     }
+}
 
-    private void ApplyGravity()
+   private void ApplyGravity()
+{
+    // ¡EL FIX! Solo aplicamos el pegamento si el jugador REALMENTE está cayendo o quieto.
+    // Si verticalVelocity.y es mayor a 0, significa que acaba de saltar, así que NO lo frenamos.
+    if (controller.isGrounded && verticalVelocity.y < 0)
     {
-        if (controller.isGrounded && verticalVelocity.y < 0)
-        {
-            verticalVelocity.y = -2f;
-        }
-
+        verticalVelocity.y = -2f;
+    }
+    else
+    {
+        // Aplicamos gravedad normal solo si no está rígidamente pegado al suelo
         verticalVelocity.y += gravity * Time.deltaTime;
-        controller.Move(verticalVelocity * Time.deltaTime);
     }
+
+    // Tu movimiento vertical independiente se queda intacto
+    controller.Move(verticalVelocity * Time.deltaTime);
+}
+
+   
 }

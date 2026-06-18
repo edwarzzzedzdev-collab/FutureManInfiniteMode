@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NuevaMoneda", menuName = "Configuracion Juego/Items/Moneda")]
+[CreateAssetMenu(fileName = "NuevaMoneda", menuName = "Game Settings/Moneda")]
 public class CoinData : ScriptableObject
 {
     [Header("Configuración Económica")]
