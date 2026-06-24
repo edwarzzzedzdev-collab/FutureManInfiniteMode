@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6039813605629918470
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5728192884086762202}
+  - component: {fileID: 8411346458156777551}
+  m_Layer: 0
+  m_Name: SpawnIntem
+  m_TagString: Untagged
+  m_Icon: {fileID: 1206586993520771344, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5728192884086762202
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6039813605629918470}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 303.7428, y: 1.83, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8411346458156777551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6039813605629918470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d60050f9751e65478dd669ff4c695ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  coin1Prefab: {fileID: 8303075797044621661, guid: 2b5a982c3803af645817c9a685be1b72, type: 3}
+  coin3Prefab: {fileID: 8303075797044621661, guid: edd93993c729da9488fc273a7bee69cd, type: 3}
+  coin5Prefab: {fileID: 8303075797044621661, guid: 58f743316943e8c4882104a0ae200c4f, type: 3}
+  healingPrefab: {fileID: 2772442438028243509, guid: 2283f1400dc16f3479bfa82a2b75a766, type: 3}
+  chanceHealing: 0.5
+  chanceCoin5: 7
+  chanceCoin3: 22

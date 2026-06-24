@@ -4,9 +4,11 @@ using UnityEngine;
 public class GenerateRoomController : MonoBehaviour
 {
     [Header("Prefabs")]
-    public GameObject BlockPrefab;
-    public GameObject SpawnItemPrefab; 
-    public GameObject SpawnEnemyPrefab; 
+    public GameObject BlockPrefab;       // ID 1
+    public GameObject SpawnEnemyPrefab;  // ID 2
+    public GameObject Spikes;            // ID 3
+    public GameObject SpawnItemPrefab;   // ID 4
+    public GameObject SpringPrefab;      // ID 5 (Muelle/Rebotador)
 
     [Header("Player Target")]
     public string playerTag = "Player";
@@ -15,6 +17,10 @@ public class GenerateRoomController : MonoBehaviour
     [Header("Room Templates")]
     public RoomData spawnRoom;
     public List<RoomData> flatRooms;
+
+    [Header("Size & Scale Settings")]
+    [Tooltip("The actual size of each tile unit. If your grid feels small, increase this (e.g., 1.5)")]
+    public float tileSizeMultiplier = 1.5f;
 
     [Header("Memory Optimization Settings")]
     [Tooltip("Distance before the end of the last chunk to trigger a new spawn")]
@@ -28,7 +34,6 @@ public class GenerateRoomController : MonoBehaviour
 
     void Start()
     {
-        // Find the player automatically using their Tag
         GameObject playerObj = GameObject.FindWithTag(playerTag);
         if (playerObj != null)
         {
@@ -36,10 +41,9 @@ public class GenerateRoomController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"GenerateRoomController: No GameObject found with tag '{playerTag}'. Make sure your Player has the correct tag.");
+            Debug.LogWarning($"GenerateRoomController: No GameObject found with tag '{playerTag}'.");
         }
 
-        // Initialize the first room (Spawn)
         SpawnNewChunk(spawnRoom);
     }
 
@@ -47,7 +51,6 @@ public class GenerateRoomController : MonoBehaviour
     {
         if (playerTransform == null) return;
 
-        // If the player gets close to the end of the generated world, spawn the next chunk
         if (playerTransform.position.x > currentXOffset - spawnThresholdDistance)
         {
             GenerateRandomFlatChunk();
@@ -66,11 +69,9 @@ public class GenerateRoomController : MonoBehaviour
 
     void SpawnNewChunk(RoomData room)
     {
-        // Create an empty GameObject to group all tiles of THIS specific chunk
         GameObject chunkContainer = new GameObject($"Chunk_{room.roomName}_{currentXOffset}");
         chunkContainer.transform.SetParent(this.transform);
 
-        // Build the blocks inside the container
         for (int y = 0; y < room.height; y++)
         {
             for (int x = 0; x < room.width; x++)
@@ -80,28 +81,59 @@ public class GenerateRoomController : MonoBehaviour
 
                 int tileID = room.layout[index];
 
-                if (tileID == 1) // Block
+                // Si es 0, es espacio vacío, saltamos al siguiente tile sin instanciar nada
+                if (tileID == 0) continue;
+
+                // Calcular posiciones escaladas en base al multiplicador (ej. 1.5)
+                float posX = currentXOffset + (x * tileSizeMultiplier);
+                float posY = y * tileSizeMultiplier;
+                Vector3 spawnPosition = new Vector3(posX, posY, 0f);
+
+                GameObject spawnedObject = null;
+
+                // Switch case para evaluar cada ID de tu tabla de Excel
+                switch (tileID)
                 {
-                    Vector3 spawnPosition = new Vector3(currentXOffset + x, y, 0f);
-                    GameObject newBlock = Instantiate(BlockPrefab, spawnPosition, Quaternion.identity);
-                    
-                    // Parent it to the container instead of the main controller
-                    newBlock.transform.SetParent(chunkContainer.transform);
+                    case 1: // Bloque Sólido
+                        if (BlockPrefab != null) spawnedObject = Instantiate(BlockPrefab, spawnPosition, Quaternion.identity);
+                        break;
+
+                    case 2: // Enemigo
+                        if (SpawnEnemyPrefab != null) spawnedObject = Instantiate(SpawnEnemyPrefab, spawnPosition, Quaternion.identity);
+                        break;
+
+                    case 3: // Espinas
+                        if (Spikes != null) spawnedObject = Instantiate(Spikes, spawnPosition, Quaternion.identity);
+                        break;
+
+                    case 4: // Ítems
+                        if (SpawnItemPrefab != null) spawnedObject = Instantiate(SpawnItemPrefab, spawnPosition, Quaternion.identity);
+                        break;
+
+                    case 5: // Muelle / Rebotador
+                        if (SpringPrefab != null) spawnedObject = Instantiate(SpringPrefab, spawnPosition, Quaternion.identity);
+                        break;
+                }
+
+                // Si se logró crear el objeto, lo escalamos y lo metemos en el contenedor para la limpieza de memoria
+                if (spawnedObject != null)
+                {
+                    spawnedObject.transform.localScale = new Vector3(tileSizeMultiplier, tileSizeMultiplier, 1f);
+                    spawnedObject.transform.SetParent(chunkContainer.transform);
                 }
             }
         }
 
-        // Move the offset forward for the NEXT chunk
-        currentXOffset += room.width;
+        // Desplazar el offset usando el ancho real escalado del cuarto
+        currentXOffset += (room.width * tileSizeMultiplier);
 
-        // Add this new container to our memory tracking queue
         activeChunkContainers.Enqueue(chunkContainer);
 
-        // Memory Cleanup: If we exceed the maximum active chunks, delete the oldest one
+        // Limpieza de memoria automática al superar el límite de chunks activos
         if (activeChunkContainers.Count > maxActiveChunks)
         {
             GameObject oldestChunk = activeChunkContainers.Dequeue();
-            Destroy(oldestChunk); // This deletes the container and ALL its children blocks instantly
+            Destroy(oldestChunk);
         }
     }
 }
