@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4893976162191710887}
+  - component: {fileID: 1852703465112271916}
   m_Layer: 0
   m_Name: SpawnEnemy
   m_TagString: Untagged
@@ -31,3 +32,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1852703465112271916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74527723562782053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee13dcd16dc5ae243b10d88478281178, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  flyEnemies:
+  - {fileID: 5248743034816792087, guid: 04a9d733d0d911e48b5a459e0f484e94, type: 3}
+  earthEnemies:
+  - {fileID: 3418481941833046807, guid: 101baf9cc7600444b9788b2a6556dc57, type: 3}
+  distanceRay: 1
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 512

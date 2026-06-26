@@ -48,6 +48,6 @@ MonoBehaviour:
   coin3Prefab: {fileID: 8303075797044621661, guid: edd93993c729da9488fc273a7bee69cd, type: 3}
   coin5Prefab: {fileID: 8303075797044621661, guid: 58f743316943e8c4882104a0ae200c4f, type: 3}
   healingPrefab: {fileID: 2772442438028243509, guid: 2283f1400dc16f3479bfa82a2b75a766, type: 3}
-  chanceHealing: 0.5
+  chanceHealing: 1
   chanceCoin5: 7
   chanceCoin3: 22

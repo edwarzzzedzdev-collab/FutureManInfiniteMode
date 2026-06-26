@@ -6,6 +6,8 @@ public enum RoomType { Flat, Up, Up2, Down, Down2 }
 public class RoomData : ScriptableObject
 {
     [Header("Room Information")]
+
+    
     public string roomName;
     public RoomType roomType;
 
